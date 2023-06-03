@@ -16,6 +16,7 @@ import { Box, Breadcrumbs, Fab, Typography } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
 import EmptyState from "../EmptyState/EmptyState";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 interface MovieListProps {
   listId: string;
@@ -24,8 +25,17 @@ interface MovieListProps {
 export default function MovieList({ listId }: MovieListProps) {
   const [isAddingMovie, setIsAddingMovie] = useState(false);
 
-  const { movies, isLoading, addMovies, reorderMovies, removeMovie, list } =
-    useMovieList(listId);
+  const {
+    movies,
+    isLoading,
+    addMovies,
+    reorderMovies,
+    removeMovie,
+    list,
+    loadMore,
+    movieIds,
+    hasMore,
+  } = useMovieList(listId);
 
   function onDragEnd(result: DropResult) {
     if (
@@ -84,28 +94,41 @@ export default function MovieList({ listId }: MovieListProps) {
             text="Click the plus button above to add movies to your list"
           />
         ) : (
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="list">
-              {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {movies?.map((movie, index) => (
-                    <DraggableElement
-                      id={movie.id}
-                      key={movie.id}
-                      index={index}
-                    >
-                      <Movie
-                        index={index}
-                        movie={movie}
-                        onDelete={() => removeMovie(movie.id)}
-                      />
-                    </DraggableElement>
-                  ))}
-                  {provided.placeholder}
+          <Box>
+            <InfiniteScroll
+              dataLength={movieIds.length}
+              next={loadMore}
+              hasMore={hasMore}
+              loader={
+                <div className="loader" key={0}>
+                  Loading ...
                 </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+              }
+            >
+              <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable droppableId="list">
+                  {(provided) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps}>
+                      {movies?.map((movie, index) => (
+                        <DraggableElement
+                          id={movie.id}
+                          key={movie.id}
+                          index={index}
+                        >
+                          <Movie
+                            index={index}
+                            movie={movie}
+                            onDelete={() => removeMovie(movie.id)}
+                          />
+                        </DraggableElement>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            </InfiniteScroll>
+          </Box>
         )}
       </Box>
     </>
