@@ -21,7 +21,7 @@ interface InitializeMovieListProps {
 
 const schema = yup.object().shape({
   name: yup.string().min(5),
-  tags: yup.array().of(yup.string().required()).min(2),
+  tags: yup.array().of(yup.string().required()).min(2, "Must select 2 genres"),
 });
 
 export default function InitializeMovieListForm({
@@ -90,6 +90,7 @@ export default function InitializeMovieListForm({
           render={({ field }) => {
             return (
               <Select
+                data-testid="genres-select"
                 label="Genres"
                 style={{ width: "100%" }}
                 multiple
@@ -115,6 +116,7 @@ export default function InitializeMovieListForm({
                       .map((option) => (
                         <Chip
                           label={option}
+                          data-testid={`genre-chip-${option}`}
                           sx={{
                             marginLeft: "3px",
                           }}
