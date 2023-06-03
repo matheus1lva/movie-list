@@ -1,4 +1,10 @@
-import { render, fireEvent, screen, within } from "@testing-library/react";
+import {
+  render,
+  fireEvent,
+  screen,
+  within,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import InitializeMovieListForm from "./InitializeMovieList";
 
@@ -24,13 +30,11 @@ describe("InitializeMovieListForm", () => {
     expect(error).toBeInTheDocument();
   });
 
-  /**
-   * this test showed some problems while development due to how material ui select interacts
-   * with react testing library
-   */
   test("Should show an error while selecting only one genre option", async () => {
     const select = screen.getByTestId("genres-select");
     const button = within(select).getByRole("button");
+    const submitButton = screen.getByRole("button", { name: /Confirm/i });
+
     fireEvent.mouseDown(button);
 
     const listbox = within(screen.getByRole("presentation")).getByRole(
@@ -39,6 +43,10 @@ describe("InitializeMovieListForm", () => {
 
     const options = within(listbox).getAllByRole("option");
     fireEvent.mouseDown(options[0]);
-    screen.getByText("Must select 2 genres");
+    userEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Must select 2 genres")).toBeInTheDocument();
+    });
   });
 });
